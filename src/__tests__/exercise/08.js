@@ -5,7 +5,7 @@ import * as React from 'react'
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import useCounter from '../../components/use-counter'
-import {act} from 'react-dom/test-utils'
+import {renderHook, act} from '@testing-library/react-hooks'
 
 const Counter = () => {
   const {count, increment, decrement} = useCounter()
@@ -33,50 +33,43 @@ test('exposes the count and increment/decrement functions', () => {
   expect(counter.textContent).toMatchInlineSnapshot(`"Counter: 0"`)
 })
 
-function setup(props) {
-  const result = {}
+test('using renderHook component', () => {
+  const {result} = renderHook(useCounter)
 
-  function TestComponent(props) {
-    Object.assign(result, useCounter(props))
-
-    return null
-  }
-  render(<TestComponent {...props} />)
-  return result
-}
-
-test('using fake component', () => {
-  let result = setup()
-
-  expect(result.count).toEqual(0)
+  expect(result.current.count).toEqual(0)
   act(() => {
-    result.increment()
+    result.current.increment()
   })
-  expect(result.count).toEqual(1)
+  expect(result.current.count).toEqual(1)
   act(() => {
-    result.decrement()
+    result.current.decrement()
   })
-  expect(result.count).toEqual(0)
+  expect(result.current.count).toEqual(0)
 })
 
 test('allows customization of the initial count', () => {
-  let result = setup({initialCount: 999})
+  const {result} = renderHook(useCounter, {
+    initialProps: {initialCount: 999},
+  })
 
-  expect(result.count).toEqual(999)
+  expect(result.current.count).toEqual(999)
 })
 
 test('allows customization of the step', () => {
-  let result = setup({step: 5})
+  const {result} = renderHook(useCounter, {
+    initialProps: {step: 5},
+  })
 
-  expect(result.count).toEqual(0)
+  expect(result.current.count).toEqual(0)
 
   act(() => {
-    result.increment()
+    result.current.increment()
   })
-  expect(result.count).toEqual(5)
+  expect(result.current.count).toEqual(5)
   act(() => {
-    result.decrement()
+    result.current.decrement()
   })
-  expect(result.count).toEqual(0)
+  expect(result.current.count).toEqual(0)
 })
+
 /* eslint no-unused-vars:0 */
